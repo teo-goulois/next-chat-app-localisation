@@ -10,9 +10,7 @@ const ThemeToggleButton = () => {
       <motion.div
         style={{ display: 'inline-block' }}
         key={useColorModeValue('light', 'dark')}
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 20, opacity: 0 }}
+        animate={{ opacity: 1, rotateY: [0,180]}}
         transition={{ duration: 0.2 }}
       >
         <IconButton
