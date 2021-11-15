@@ -1,0 +1,23 @@
+
+[
+    {
+        "name": "room 1",
+        "center": { "lat": 45.1645, "lng": 16.4521 },
+        "radius": "500"
+    },
+    {
+        "name": "room 2",
+        "center": { "lat": 31.1645, "lng": 12.4521 },
+        "radius": "5000"
+    },
+    {
+        "name": "room 3",
+        "center": { "lat": 65.1645, "lng": 25.4521 },
+        "radius": "1000"
+    }, 
+    {
+        "name": "test",
+        "center": { "lat": 43.712386 , "lng": 16.836335 },
+        "radius": "1000"
+    }
+]

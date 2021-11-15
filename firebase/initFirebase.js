@@ -3,13 +3,13 @@ import { getFirestore } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDzw-ITHWkOA4o29lDSfX0ZY8iqq2MOits',
-  authDomain: 'chat-app-localisation.firebaseapp.com',
-  projectId: 'chat-app-localisation',
-  storageBucket: 'chat-app-localisation.appspot.com',
-  messagingSenderId: '826320291562',
-  appId: '1:826320291562:web:03597798b3e668b4fbb993',
-  measurementId: 'G-1G72RD1HLD'
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MESUREMENT_ID
 }
 
 const app = initializeApp(firebaseConfig)

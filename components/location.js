@@ -1,30 +1,25 @@
-import React from 'react'
-
-const Location = () => {
-    const getLocation = () => {
-        if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
-    }
-
-    const geoSuccess = (position) => {
-        let lat = position.coords.latitude;
-        let lng = position.coords.longitude;
-        alert(`lat: ${lat} lng: ${lng}`)
-    }
-
-    const geoError = () => {
-        alert('geo failed')
-    }
-
-    return (
-        <div>
-            location
-            <button onClick={getLocation}>localisation</button>
-        </div>
-    )
+import React, { useEffect, useState } from 'react'
+import { Box } from '@chakra-ui/layout'
+import HomePage from './map'
+const Location = ({
+  coords,
+  selectedRadius,
+  setSelectedRadius,
+  centeredPosition
+}) => {
+  return (
+    <div>
+      location
+      <Box w="xl" h={500}>
+        <HomePage
+          selectedRadius={selectedRadius}
+          setSelectedRadius={setSelectedRadius}
+          coords={coords}
+          centeredPosition={centeredPosition}
+        />
+      </Box>
+    </div>
+  )
 }
 
 export default Location

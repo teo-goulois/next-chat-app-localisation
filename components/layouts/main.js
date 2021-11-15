@@ -1,5 +1,4 @@
 import React from 'react'
-import Head from 'next/head'
 import Header from '../header'
 import { Box, Container } from '@chakra-ui/layout'
 import { AuthProvider } from '../../src/hook/auth'
@@ -10,16 +9,9 @@ function Main({ children, router }) {
     <AuthProvider>
       <AuthStateChanged>
         <Box as="main" pb={6}>
-          <Head>
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1"
-            />
-            <title>prechat</title>
-          </Head>
           <Header path={router.asPath} />
 
-          <Container>{children}</Container>
+          <Container maxW={'container.xl'}>{children}</Container>
         </Box>
       </AuthStateChanged>
     </AuthProvider>
