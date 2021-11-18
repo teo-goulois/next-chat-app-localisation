@@ -1,3 +1,5 @@
+import NextLink from 'next/link'
+// ui
 import { Button } from '@chakra-ui/button'
 import {
   Container,
@@ -13,11 +15,11 @@ import {
   IconButton,
   useColorModeValue
 } from '@chakra-ui/react'
-import NextLink from 'next/link'
-import ThemeToggleButton from './themeToggleButton'
-// import useAuth from '../src/hook/auth'
 import { HamburgerIcon } from '@chakra-ui/icons'
+// auth
 import useAuth from '../src/hook/auth'
+//  components
+import ThemeToggleButton from './themeToggleButton'
 
 const LinkItem = ({ href, path, _target, children, ...props }) => {
   const active = path === href
@@ -65,11 +67,7 @@ const Header = props => {
           display={{ base: 'none', md: 'flex' }}
           align="center"
         >
-          <LinkItem href="/test1" path={path}>
-            test 1
-          </LinkItem>
-          <p>test 2</p>
-          <p>test 3</p>
+    
         </Stack>
 
         <Stack direction="row" spacing={2}>

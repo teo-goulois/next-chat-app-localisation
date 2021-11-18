@@ -1,9 +1,44 @@
+import React, { useEffect, useState } from 'react'
+// ui
 import { Button } from '@chakra-ui/button'
-import { Box, Divider, Heading, Stack, Text } from '@chakra-ui/layout'
+import { Box, Divider, Heading, Stack, Text, VStack } from '@chakra-ui/layout'
 import { Select } from '@chakra-ui/select'
-import React from 'react'
+// auth
+import useAuth from '../src/hook/auth'
+// firebase calls
+import { getMyRooms } from '../src/hook/firebase'
 
-const MyRoom = () => {
+const MyRoom = ({ setActiveRoom, setTabIndex }) => {
+  const auth = useAuth()
+  const { user } = auth
+  // states
+  const [myRooms, setMyRooms] = useState(null)
+  const [myRoom, setMyRoom] = useState(null)
+  const [selectedRadius, setSelectedRadius] = useState('croissant')
+
+  useEffect(() => {
+    getMyRooms(user, setMyRooms, setMyRoom)
+  }, [])
+
+
+  // handle radius change
+  const handleChange = e => {
+    setSelectedRadius(e.target.value)
+  }
+
+  useEffect(() => {
+    if (selectedRadius === 'croissant') {
+      let nroom = myRooms?.sort((a, b) => Number(a.radius) - Number(b.radius))
+      console.log(nroom)
+      setMyRoom(nroom)
+    } else {
+      let nroom = myRooms?.filter(
+        r => Number(selectedRadius) >= Number(r.radius)
+      )
+      setMyRoom(nroom)
+    }
+  }, [selectedRadius])
+
   return (
     <Box p={5}>
       <Box>
@@ -11,34 +46,41 @@ const MyRoom = () => {
           My Room
         </Heading>
         <Box>
-          <Select placeholder="radius">
-            <option value="option1">100 m</option>
-            <option value="option2">500 m</option>
-            <option value="option3">1 km</option>
-            <option value="option3">5 km</option>
+          <Select
+            defaultValue="croissant"
+            onChange={handleChange}
+            placeholder="select radius"
+          >
+            <option value="croissant">croissant</option>
+            <option value="500">500 m</option>
+            <option value="1000">1 km</option>
+            <option value="5000">5 km</option>
           </Select>
         </Box>
       </Box>
       <Divider />
       <Stack>
-        <Button
-          mt={2}
-          p={2}
-          border="1px"
-          borderColor="gray.500"
-          borderRadius={5}
-        >
-          <Text>nom de Room</Text>
-        </Button>
-        <Button
-          mt={2}
-          p={2}
-          border="1px"
-          borderColor="gray.500"
-          borderRadius={5}
-        >
-          <Text>nom de Room</Text>
-        </Button>
+        {myRoom?.map(r => (
+          <Button
+            key={r.id}
+            mt={2}
+            p={2}
+            border="1px"
+            borderColor="gray.500"
+            borderRadius={5}
+            onClick={() => {
+              setActiveRoom(r.id)
+              setTabIndex(1)
+            }}
+          >
+            <VStack p={2}>
+              <Text>{r.name}</Text>
+              <Text fontSize="xs" color="gray.400" as="i" align="center">
+                {r.radius} m
+              </Text>
+            </VStack>
+          </Button>
+        ))}
       </Stack>
     </Box>
   )

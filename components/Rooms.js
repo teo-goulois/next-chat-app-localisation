@@ -1,83 +1,77 @@
 import React, { useEffect, useState } from 'react'
+// ui
 import { Box, Divider, Heading, Text, VStack } from '@chakra-ui/layout'
 import { Select } from '@chakra-ui/select'
 import { Button } from '@chakra-ui/button'
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Input
-} from '@chakra-ui/react'
-import jsonRooms from '../rooms.json'
-import { collection, addDoc } from 'firebase/firestore'
-import { db } from '../firebase/initFirebase'
+import { useDisclosure } from '@chakra-ui/react'
+// animation
+import { motion } from 'framer-motion'
+// auth
+import useAuth from '../src/hook/auth'
+// Components
+import CreateRoomModal from './CreateRoomModal'
+import JoinModal from './JoinModal'
+// firebase calls
+import { postRoom } from '../src/hook/firebase'
+
+const variants = {
+  open: { opacity: 1, y: 0, display: 'block' },
+  closed: { opacity: 0, y: '-100%', display: 'none' }
+}
 
 const Rooms = ({
   coords,
   selectedRadius,
   setSelectedRadius,
   setCenteredPosition,
-  roomsData
+  roomsData,
+  setSelectedRoom
 }) => {
-  console.log('romms data', roomsData)
-  roomsData?.forEach((doc) => console.log(doc.data()))
+  const auth = useAuth()
+  const { user } = auth
+  // states
+  const [btnOpen, setbtnOpen] = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [rooms, setRooms] = useState(jsonRooms)
+  const [joinRoom, setJoinRoom] = useState(false)
+  const [rooms, setRooms] = useState(roomsData)
   const [newRoomData, setNewRoomData] = useState({
     name: '',
     radius: '',
     center: null
   })
+
+  // set the rooms to show to croissant at the start
   useEffect(() => {
-    let nroom = jsonRooms.sort((a, b) => a.radius - b.radius)
+    let nroom = roomsData.sort((a, b) => Number(a.radius) - Number(b.radius))
     setRooms(nroom)
+    console.log(user.uid)
   }, [])
 
   useEffect(() => {
-    console.log(newRoomData)
-  }, [newRoomData])
+    console.log(selectedRadius)
+  }, [selectedRadius])
 
+  // change the rooms disposition on radius change
   useEffect(() => {
     if (selectedRadius === 'croissant') {
-      let nroom = jsonRooms.sort((a, b) => a.radius - b.radius)
+      let nroom = roomsData.sort((a, b) => Number(a.radius) - Number(b.radius))
       setRooms(nroom)
     } else {
-      let nroom = jsonRooms.filter(r => r.radius === selectedRadius)
+      let nroom = roomsData.filter(
+        r => Number(selectedRadius) >= Number(r.radius)
+      )
       setRooms(nroom)
     }
   }, [selectedRadius])
 
+  // handle radius change
   const handleChange = e => {
     setSelectedRadius(e.target.value)
   }
-  const handleClick = () => {
-    setNewRoomData({ ...newRoomData, center: coords })
-    const sendtoFirestore = async () => {
-      try {
-        const docRef = await addDoc(collection(db, 'rooms'), {
-          name: newRoomData.name,
-          center: newRoomData.center,
-          radius: newRoomData.radius
-        })
-        console.log('Document written with ID: ', docRef.id)
-      } catch (e) {
-        console.error('Error adding document: ', e)
-      }
-    }
-    sendtoFirestore()
-  }
 
-  useEffect(() => {
-    console.log(roomsData)
-  }, [])
+  const handleClick = () => {
+    postRoom(newRoomData, coords, user, onClose)
+  }
 
   return (
     <Box p={5}>
@@ -86,48 +80,13 @@ const Rooms = ({
         <Button onClick={onOpen} w="full" mb={2}>
           new room
         </Button>
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Create a new Room</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <FormControl id="email">
-                <FormLabel>new Room</FormLabel>
-                <Input
-                  onChange={e =>
-                    setNewRoomData({ ...newRoomData, name: e.target.value })
-                  }
-                  type="text"
-                />
-                <FormHelperText>name of the room.</FormHelperText>
-              </FormControl>
-
-              <Select
-                onChange={e =>
-                  setNewRoomData({ ...newRoomData, radius: e.target.value })
-                }
-                mt={2}
-                w="fit-content"
-                placeholder="radius"
-              >
-                <option value="500">500 m</option>
-                <option value="1000">1 km</option>
-                <option value="5000">5 km</option>
-                <option value="10000">10 km</option>
-              </Select>
-            </ModalBody>
-
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={onClose}>
-                Close
-              </Button>
-              <Button onClick={handleClick} variant="ghost">
-                Create
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+        <CreateRoomModal
+          newRoomData={newRoomData}
+          isOpen={isOpen}
+          onClose={onClose}
+          setNewRoomData={setNewRoomData}
+          handleClick={handleClick}
+        />
         <Box>
           <Select
             defaultValue="croissant"
@@ -143,39 +102,67 @@ const Rooms = ({
       </Box>
       <Divider />
 
-      {roomsData?.length > 0 ? (
-        roomsData.map(r => {
+      {rooms?.length > 0 ? (
+        rooms.map((r, index) => {
           if (
-            r.data().center.lat > coords.lat - 0.45 &&
-            r.data().center.lat < coords.lat + 0.45 &&
-            r.data().center.lng > coords.lng - 0.45 &&
-            r.data().center.lng < coords.lng + 0.45
+            /*  r.center.lat > coords.lat - 0.45 &&
+            r.center.lat < coords.lat + 0.45 &&
+            r.center.lng > coords.lng - 0.45 &&
+            r.center.lng < coords.lng + 0.45 */
+            true
           ) {
             return (
-              <Button
-                mt={2}
-                p={2}
-                border="1px"
-                borderColor="gray.500"
-                borderRadius={5}
-                w="full"
-                onClick={() => {
-                  setCenteredPosition({ lat: 0, lng: 0 })
-                  setCenteredPosition(r.data().center)
-                }}
-              >
-                <VStack p={2}>
-                  <Text>{r.data().name}</Text>
-                  <Text fontSize="xs" color="gray.400" as="i" align="center">
-                    {r.data().radius} m
-                  </Text>
-                </VStack>
-              </Button>
+              <div key={r.id}>
+                <Button
+                  zIndex={2}
+                  mt={2}
+                  p={2}
+                  border="1px"
+                  borderColor="gray.500"
+                  borderRadius={5}
+                  w="full"
+                  onClick={() => {
+                    setCenteredPosition({ lat: 0, lng: 0 })
+                    setCenteredPosition(r.center)
+                    setSelectedRoom(r.name)
+                    setbtnOpen(index)
+                  }}
+                >
+                  <VStack p={2}>
+                    <Text>{r.name}</Text>
+                    <Text fontSize="xs" color="gray.400" as="i" align="center">
+                      {r.radius} m
+                    </Text>
+                  </VStack>
+                </Button>
+                <motion.div
+                  animate={btnOpen === index ? 'open' : 'closed'}
+                  variants={variants}
+                >
+                  <Button
+                    onClick={() => {
+                      setJoinRoom(index)
+                    }}
+                    mt={2}
+                    w="full"
+                    zIndex={0}
+                  >
+                    join
+                  </Button>
+                </motion.div>
+                {joinRoom === index && (
+                  <JoinModal
+                    isOpen={true}
+                    setJoinRoom={setJoinRoom}
+                    name={r.name}
+                  />
+                )}
+              </div>
             )
           }
         })
       ) : (
-        <p>no room coresponding</p>
+        <p>no room available, create one !</p>
       )}
     </Box>
   )
