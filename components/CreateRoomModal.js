@@ -18,11 +18,12 @@ import {
   HStack,
   Container,
   Text,
-  Select
+  Select,
+  Textarea
 } from '@chakra-ui/react'
 import { CloseIcon } from '@chakra-ui/icons'
 
-const CreateRoomModal = ({ isOpen, onClose, setNewRoomData, handleClick, newRoomData }) => {
+const CreateRoomModal = ({ isOpen, onClose, setNewRoomData, handleClick, newRoomData, errors }) => {
   return (
     <div>
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -31,15 +32,20 @@ const CreateRoomModal = ({ isOpen, onClose, setNewRoomData, handleClick, newRoom
           <ModalHeader>Create a new Room</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl id="email">
-              <FormLabel>new Room</FormLabel>
+            <FormControl>
+              <FormLabel>name of the room</FormLabel>
               <Input
                 onChange={e =>
                   setNewRoomData({ ...newRoomData, name: e.target.value })
                 }
+                required
                 type="text"
+                isInvalid={errors?.name === "filed name"}
               />
-              <FormHelperText>name of the room.</FormHelperText>
+              <FormHelperText>description.</FormHelperText>
+              <Textarea  isInvalid={errors?.description === "filed description"} required onChange={e =>
+                  setNewRoomData({ ...newRoomData, description: e.target.value })
+                }></Textarea>
             </FormControl>
 
             <Select

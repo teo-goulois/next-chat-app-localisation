@@ -9,9 +9,8 @@ const Location = ({
   roomsData,
   selectedRoom
 }) => {
-
   useEffect(() => {
-    console.log(selectedRoom)
+    console.log(roomsData)
   }, [selectedRoom])
 
   const googlemap = useRef(null)
@@ -30,7 +29,6 @@ const Location = ({
       if (selectedRoom !== null) {
         addMarker(centeredPosition, map)
       }
-
       roomsData.map(r => {
         if (selectedRadius === 'croissant') {
           const cityCircle = new google.maps.Circle({
@@ -66,7 +64,7 @@ const Location = ({
         fillOpacity: 0.35,
         map,
         center: myPosition,
-        radius: Math.sqrt(100)
+        radius: Math.sqrt(100) * 100
       })
       // cityCircle.setMap(map)
     })
@@ -85,19 +83,9 @@ const Location = ({
   }
 
   return (
-    <div>
-      location
-      <Box w="xl" h={500}>
-        <p>
-          lat: {coords.lat}, lng: {coords.lng}
-        </p>
-        <div
-          style={{ width: '100%', height: '100%' }}
-          id="map"
-          ref={googlemap}
-        />
-      </Box>
-    </div>
+    <Box w="100%" h="80vh">
+      <div style={{ width: '100%', height: '100%' }} id="map" ref={googlemap} />
+    </Box>
   )
 }
 

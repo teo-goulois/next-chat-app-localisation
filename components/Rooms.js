@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { Box, Divider, Heading, Text, VStack } from '@chakra-ui/layout'
 import { Select } from '@chakra-ui/select'
 import { Button } from '@chakra-ui/button'
-import { useDisclosure } from '@chakra-ui/react'
+import { useDisclosure, IconButton } from '@chakra-ui/react'
+import { CloseIcon, ChevronRightIcon, ChevronLeftIcon } from '@chakra-ui/icons'
+
 // animation
 import { motion } from 'framer-motion'
 // auth
@@ -25,7 +27,8 @@ const Rooms = ({
   setSelectedRadius,
   setCenteredPosition,
   roomsData,
-  setSelectedRoom
+  setSelectedRoom,
+  setBtnOpen
 }) => {
   const auth = useAuth()
   const { user } = auth
@@ -37,19 +40,24 @@ const Rooms = ({
   const [newRoomData, setNewRoomData] = useState({
     name: '',
     radius: '',
+    description: '',
     center: null
+  })
+  const [errors, setErrors] = useState({
+    name: '',
+    radius: '',
+    description: ''
   })
 
   // set the rooms to show to croissant at the start
   useEffect(() => {
     let nroom = roomsData.sort((a, b) => Number(a.radius) - Number(b.radius))
     setRooms(nroom)
-    console.log(user.uid)
   }, [])
 
-  useEffect(() => {
+  /*   useEffect(() => {
     console.log(selectedRadius)
-  }, [selectedRadius])
+  }, [selectedRadius]) */
 
   // change the rooms disposition on radius change
   useEffect(() => {
@@ -70,101 +78,227 @@ const Rooms = ({
   }
 
   const handleClick = () => {
-    postRoom(newRoomData, coords, user, onClose)
+    setErrors(null)
+    if (newRoomData.name === '') {
+      setErrors({ ...errors, name: 'filed name' })
+    } else if (newRoomData.description === '') {
+      setErrors({ ...errors, description: 'filed description' })
+    } else if (newRoomData.radius === '') {
+      setErrors({ ...errors, radius: 'chose radius' })
+    } else {
+      postRoom(newRoomData, coords, user, onClose)
+    }
+  }
+
+  const handleDrag = e => {
+    console.log(e)
   }
 
   return (
-    <Box p={5}>
-      <Box>
-        <Heading as="h4">Rooms</Heading>
-        <Button onClick={onOpen} w="full" mb={2}>
-          new room
-        </Button>
-        <CreateRoomModal
-          newRoomData={newRoomData}
-          isOpen={isOpen}
-          onClose={onClose}
-          setNewRoomData={setNewRoomData}
-          handleClick={handleClick}
-        />
+    <>
+      <Box display={{ base: 'none', md: 'block' }} p={5}>
         <Box>
-          <Select
-            defaultValue="croissant"
-            onChange={handleChange}
-            placeholder="select radius"
-          >
-            <option value="croissant">croissant</option>
-            <option value="500">500 m</option>
-            <option value="1000">1 km</option>
-            <option value="5000">5 km</option>
-          </Select>
+          <Heading as="h4">Rooms</Heading>
+          <Button onClick={onOpen} w="full" mb={2}>
+            new room
+          </Button>
+          <CreateRoomModal
+            newRoomData={newRoomData}
+            isOpen={isOpen}
+            onClose={onClose}
+            setNewRoomData={setNewRoomData}
+            handleClick={handleClick}
+            errors={errors}
+          />
+          <Box>
+            <Select
+              defaultValue="croissant"
+              onChange={handleChange}
+              placeholder="select radius"
+            >
+              <option value="croissant">croissant</option>
+              <option value="500">500 m</option>
+              <option value="1000">1 km</option>
+              <option value="5000">5 km</option>
+            </Select>
+          </Box>
         </Box>
-      </Box>
-      <Divider />
+        <Divider />
 
-      {rooms?.length > 0 ? (
-        rooms.map((r, index) => {
-          if (
-            /*  r.center.lat > coords.lat - 0.45 &&
+        {rooms?.length > 0 ? (
+          rooms.map((r, index) => {
+            if (r.users.includes(user.uid)) return
+            if (
+              /*  r.center.lat > coords.lat - 0.45 &&
             r.center.lat < coords.lat + 0.45 &&
             r.center.lng > coords.lng - 0.45 &&
             r.center.lng < coords.lng + 0.45 */
-            true
-          ) {
-            return (
-              <div key={r.id}>
-                <Button
-                  zIndex={2}
-                  mt={2}
-                  p={2}
-                  border="1px"
-                  borderColor="gray.500"
-                  borderRadius={5}
-                  w="full"
-                  onClick={() => {
-                    setCenteredPosition({ lat: 0, lng: 0 })
-                    setCenteredPosition(r.center)
-                    setSelectedRoom(r.name)
-                    setbtnOpen(index)
-                  }}
-                >
-                  <VStack p={2}>
-                    <Text>{r.name}</Text>
-                    <Text fontSize="xs" color="gray.400" as="i" align="center">
-                      {r.radius} m
-                    </Text>
-                  </VStack>
-                </Button>
-                <motion.div
-                  animate={btnOpen === index ? 'open' : 'closed'}
-                  variants={variants}
-                >
+              true
+            ) {
+              return (
+                <div key={r.id}>
                   <Button
-                    onClick={() => {
-                      setJoinRoom(index)
-                    }}
+                    zIndex={2}
                     mt={2}
+                    p={2}
+                    border="1px"
+                    borderColor="gray.500"
+                    borderRadius={5}
                     w="full"
-                    zIndex={0}
+                    onClick={() => {
+                      setCenteredPosition({ lat: 0, lng: 0 })
+                      setCenteredPosition(r.center)
+                      setSelectedRoom(r.name)
+                      setbtnOpen(index)
+                    }}
                   >
-                    join
+                    <VStack p={2}>
+                      <Text>{r.name}</Text>
+                      <Text
+                        fontSize="xs"
+                        color="gray.400"
+                        as="i"
+                        align="center"
+                      >
+                        {r.radius} m
+                      </Text>
+                    </VStack>
                   </Button>
-                </motion.div>
-                {joinRoom === index && (
-                  <JoinModal
-                    isOpen={true}
-                    setJoinRoom={setJoinRoom}
-                    name={r.name}
-                  />
-                )}
-              </div>
-            )
-          }
-        })
-      ) : (
-        <p>no room available, create one !</p>
-      )}
-    </Box>
+                  <motion.div
+                    animate={btnOpen === index ? 'open' : 'closed'}
+                    variants={variants}
+                  >
+                    <Button
+                      onClick={() => {
+                        setJoinRoom(index)
+                      }}
+                      mt={2}
+                      w="full"
+                      zIndex={0}
+                    >
+                      join
+                    </Button>
+                  </motion.div>
+                  {joinRoom === index && (
+                    <JoinModal
+                      isOpen={true}
+                      setJoinRoom={setJoinRoom}
+                      room={r}
+                      userId={user.uid}
+                    />
+                  )}
+                </div>
+              )
+            }
+          })
+        ) : (
+          <p>no room available, create one !</p>
+        )}
+      </Box>
+
+      <Box w="100vw" display={{ base: 'block', md: 'none' }} p={5}>
+        <IconButton
+          onClick={() => setBtnOpen('1')}
+          icon={<ChevronLeftIcon />}
+        />{' '}
+        <Box textAlign="center">
+          <Heading as="h4">Rooms</Heading>
+          <Button onClick={onOpen} w="full" mb={2}>
+            new room
+          </Button>
+          <CreateRoomModal
+            newRoomData={newRoomData}
+            isOpen={isOpen}
+            onClose={onClose}
+            setNewRoomData={setNewRoomData}
+            handleClick={handleClick}
+            errors={errors}
+          />
+          <Box>
+            <Select
+              defaultValue="croissant"
+              onChange={handleChange}
+              placeholder="select radius"
+            >
+              <option value="croissant">croissant</option>
+              <option value="500">500 m</option>
+              <option value="1000">1 km</option>
+              <option value="5000">5 km</option>
+            </Select>
+          </Box>
+        </Box>
+        <Divider />
+        {rooms?.length > 0 ? (
+          rooms.map((r, index) => {
+            if (r.users.includes(user.uid)) return
+            if (
+              /*  r.center.lat > coords.lat - 0.45 &&
+            r.center.lat < coords.lat + 0.45 &&
+            r.center.lng > coords.lng - 0.45 &&
+            r.center.lng < coords.lng + 0.45 */
+              true
+            ) {
+              return (
+                <div key={r.id}>
+                  <Button
+                    zIndex={2}
+                    mt={2}
+                    p={2}
+                    border="1px"
+                    borderColor="gray.500"
+                    borderRadius={5}
+                    w="full"
+                    onClick={() => {
+                      setCenteredPosition({ lat: 0, lng: 0 })
+                      setCenteredPosition(r.center)
+                      setSelectedRoom(r.name)
+                      setbtnOpen(index)
+                    }}
+                  >
+                    <VStack p={2}>
+                      <Text>{r.name}</Text>
+                      <Text
+                        fontSize="xs"
+                        color="gray.400"
+                        as="i"
+                        align="center"
+                      >
+                        {r.radius} m
+                      </Text>
+                    </VStack>
+                  </Button>
+                  <motion.div
+                    animate={btnOpen === index ? 'open' : 'closed'}
+                    variants={variants}
+                  >
+                    <Button
+                      onClick={() => {
+                        setJoinRoom(index)
+                      }}
+                      mt={2}
+                      w="full"
+                      zIndex={0}
+                    >
+                      join
+                    </Button>
+                  </motion.div>
+                  {joinRoom === index && (
+                    <JoinModal
+                      isOpen={true}
+                      setJoinRoom={setJoinRoom}
+                      room={r}
+                      userId={user.uid}
+                    />
+                  )}
+                </div>
+              )
+            }
+          })
+        ) : (
+          <p>no room available, create one !</p>
+        )}
+      </Box>
+    </>
   )
 }
 

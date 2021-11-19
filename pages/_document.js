@@ -7,9 +7,9 @@ import theme from "../lib/theme"
 export default class Document extends NextDocument {
   render() {
     return (
-      <Html lang="en">
+      <Html style={{height: '100%'}} lang="en">
         <Head />
-        <body>
+        <body style={{height: '100%'}} >
           {/* 👇 Here's the script */}
           <ColorModeScript initialColorMode={theme.config.initialColorMode} />
           <Main />

@@ -14,7 +14,7 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { withPublic } from '../../src/hook/route'
-
+import { postRegister } from '../../src/hook/firebase'
 const Register = ({ auth }) => {
   const { user, createUserWithEmailAndPassword, error } = auth
   const [formData, setFormData] = useState({})
@@ -26,7 +26,8 @@ const Register = ({ auth }) => {
     if (formData.password1 !== formData.password2) {
       setErrors({ ...errors, passwordNoMatch: true })
     } else {
-      createUserWithEmailAndPassword(formData.email, formData.password1)
+      createUserWithEmailAndPassword(formData.email, formData.password1, formData.username)
+      // postRegister(formData)
       Router.push('/')
       console.log(error)
     }
@@ -43,6 +44,23 @@ const Register = ({ auth }) => {
           Register
         </Heading>
         <Stack p={2}>
+          <FormControl>
+            <FormLabel>username</FormLabel>
+            <Input
+            isInvalid={errors.invalidusername}
+            errorBorderColor="crimson"
+              onChange={e =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+              type="text"
+            ></Input>
+             {errors.invalidusername ? (
+              <FormHelperText color="red.300">
+                must be 3 characteres
+              </FormHelperText>
+            ) : null}
+          </FormControl>
+
           <FormControl>
             <FormLabel>email</FormLabel>
             <Input

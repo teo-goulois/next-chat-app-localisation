@@ -8,10 +8,10 @@ function Main({ children, router }) {
   return (
     <AuthProvider>
       <AuthStateChanged>
-        <Box as="main" pb={6}>
+        <Box h='100%' as="main">
           <Header path={router.asPath} />
 
-          <Container maxW={'container.xl'}>{children}</Container>
+          <Container p={0} h='100%' maxW={'container.xl'}>{children}</Container>
         </Box>
       </AuthStateChanged>
     </AuthProvider>

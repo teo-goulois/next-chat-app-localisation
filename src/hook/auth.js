@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { AuthService } from "../service/AuthService";
-
+import { postRegister } from "./firebase";
 const authContext = createContext();
 
 export default function useAuth() {
@@ -11,8 +11,10 @@ export function AuthProvider(props) {
 	const [user, setUser] = useState(null);
 	const [error, setError] = useState("");
 
-	const createUserWithEmailAndPassword = async (email, password) => {
+	const createUserWithEmailAndPassword = async (email, password, username) => {
 		const { error, user } = await AuthService.CreateUserWithEmailAndPassword(email, password);
+		console.log(user.uid)
+		postRegister(username, user.uid)
 		setUser(user ?? null);
 		setError(error ?? "");
 	};

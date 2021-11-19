@@ -43,7 +43,7 @@ const Login = ({ auth }) => {
       >
         <Heading p={4} textAlign="center" as="h2">
           Login
-          <h1>{user?.uid}</h1>
+          <h3>{user?.uid}</h3>
         </Heading>
         <Stack p={2}>
           <FormControl>

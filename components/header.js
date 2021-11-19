@@ -13,7 +13,9 @@ import {
   MenuList,
   MenuButton,
   IconButton,
-  useColorModeValue
+  useColorModeValue,
+  Avatar,
+  Text
 } from '@chakra-ui/react'
 import { HamburgerIcon } from '@chakra-ui/icons'
 // auth
@@ -47,6 +49,7 @@ const Header = props => {
     <Box
       as="nav"
       w="100%"
+      h='4em'
       bg={useColorModeValue('#ffffff40', '#20202380')}
       {...props}
     >
@@ -66,12 +69,11 @@ const Header = props => {
           direction={{ base: 'column', md: 'row' }}
           display={{ base: 'none', md: 'flex' }}
           align="center"
-        >
-    
-        </Stack>
+        ></Stack>
 
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={2}>
           <ThemeToggleButton />
+
           <Box ml={2} display={{ base: 'inline-block', md: 'none' }}>
             <Menu isLazy id="navbar-menu">
               <MenuButton
@@ -82,9 +84,23 @@ const Header = props => {
               />
               <MenuList>
                 {user ? (
-                  <MenuItem onClick={logout} as={Link}>
-                    sign out
-                  </MenuItem>
+                  <>
+                    <NextLink href="/profile" passHref>
+                      <MenuItem>
+                        <Avatar
+                          size="sm"
+                          mr={2}
+                          name={user.displayName}
+                          src={user.photoURL}
+                        />
+                        <Text as="samp">{user.displayName}</Text>{' '}
+                      </MenuItem>
+                    </NextLink>
+
+                    <MenuItem onClick={logout} as={Link}>
+                      sign out
+                    </MenuItem>
+                  </>
                 ) : (
                   <>
                     <NextLink href="/login" passHref>
@@ -98,11 +114,25 @@ const Header = props => {
               </MenuList>
             </Menu>
           </Box>
-          <Box display={{ base: 'none', md: 'flex' }}>
+
+          <Box display={{ base: 'none', md: 'flex' }} alignItems="center">
             {user ? (
-              <Button onClick={logout} colorScheme="teal" variant="outline">
-                sign out
-              </Button>
+              <>
+                <button>
+                  <NextLink href="/profile" passHref>
+                    <Avatar
+                      mr={2}
+                      size="md"
+                      name={user.displayName}
+                      src={user.photoURL}
+                    />
+                  </NextLink>
+                </button>
+
+                <Button onClick={logout} colorScheme="teal" variant="outline">
+                  sign out
+                </Button>
+              </>
             ) : (
               <Stack direction="row" spacing={2}>
                 <NextLink href="/auth/login" pathHref>
